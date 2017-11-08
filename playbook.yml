@@ -1,0 +1,44 @@
+---
+- hosts: all
+  sudo: true
+  tasks:
+    - name: update apt cache
+      apt: update_cache=yes
+
+    - name: install mysql
+      apt: name=mysql-server state=present
+
+    - name: install mysql-python
+      apt: name=python-mysqldb state=present
+
+    - name: Create global my.cnf
+      template: src=etc.my.cnf dest=/etc/mysql/my.cnf
+
+    - name: Create a new database with name 'ghost'
+      mysql_db:
+        name: ghost
+        state: present
+
+    - name: Create new database user
+      mysql_user:
+        name: ghost
+        password: ghost
+        priv: '*.*:ALL'
+        state: present
+
+    - name: install docker
+      apt: name=docker state=latest
+
+    - name: install docker IO
+      apt: name=docker.io state=latest
+
+    - name: copy configs
+      copy:
+        src: /home/unzmog/dev/ghost-vm/config.development.json
+        dest: /home/vagrant/config.development.json
+        force: yes
+
+    - name: Run ghost image on docker
+      run_once: true
+      shell: docker run -d --name ghost --net=host -p 8080:2368 -v /home/vagrant/config.development.json:/var/lib/ghost/config.production.json ghost
+      #      shell: docker run -d --name ghost -p 8080:2368 --add-host="docker:172.17.42.1" ghost
