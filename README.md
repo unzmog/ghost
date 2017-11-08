@@ -1,6 +1,6 @@
 ## Requirements
-..* Installed Ansible
-..* Installed Vagrant
++ Installed Ansible
++ Installed Vagrant
 
 ## Running
 ```
